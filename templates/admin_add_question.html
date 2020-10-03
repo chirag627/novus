@@ -1,0 +1,254 @@
+{% extends 'admin_base.html' %}
+
+{% block content %}
+    <p>lets add the question for {{ set.name }}</p>
+    <a href="{% url 'view-set' set.pk %}">Back To Set Questions</a>
+    <div id="loadProgress">Image Load Progress:</div>
+    <br>
+    <div class="row m-0 p-0 border rounded-lg p-4" style="min-width: 900px">
+        <div class="col-8 shadow-lg">
+            <div style="width:512px;height:512px;position:relative;color: white;display:block;"
+                 oncontextmenu="return false"
+                 class='disable-selection noIbar shadow border'
+                 unselectable='on'
+                 onselectstart='return false;'
+                 onmousedown='return false;'>
+                <div id="dicomImage"
+                     style="width:512px;height:512px;top:0px;left:0px; position:absolute">
+                </div>
+            </div>
+                <button id="zoomIn" type="button" class="btn badge-pill btn-sm btn-light">Zoom In</button>
+    <button id="zoomOut" type="button" class="btn badge-pill btn-sm btn-light">Zoom Out</button>
+    <button id="reset" type="button" class="btn badge-pill btn-sm btn-light">Reset</button>
+
+        </div>
+        <div class="col-4 shadow-lg">
+            <input type="file" class="file-upload rounded-0 p-2 my-2" id="selectFile">
+            <div class="btn-group w-100 py-2" id="res_box">
+                <button id="res_normal_btn" class="btn btn-outline-light badge-pill">Normal</button>
+                <button id="res_abnormal_btn" class="btn btn-outline-light badge-pill">Abnormal</button>
+            </div>
+            <div class="w-100 my-4">
+                <textarea id="res_ans_box" class="form-control rounded-0 shadow bg-white text-dark"
+                          placeholder="Why It is abnormal?"></textarea>
+            </div>
+            <div class="row m-0 p-0 justify-content-center">
+                <button class="btn btn-light position-absolute m-2 fixed-bottom" id="add_question_btn">Add Question
+                </button>
+                <p id="status" class="font-weight-bold"></p>
+            </div>
+
+        </div>
+    </div>
+
+
+    <script>
+        cornerstoneWADOImageLoader.external.cornerstone = cornerstone;
+
+        // this function gets called once the user drops the file onto the div
+
+
+        // Setup the dnd listeners.
+
+        cornerstoneWADOImageLoader.configure({
+            beforeSend: function (xhr) {
+                // Add custom headers here (e.g. auth tokens)
+                //xhr.setRequestHeader('x-auth-token', 'my auth token');
+            },
+            useWebWorkers: true,
+        });
+
+        let loaded = false;
+
+        function loadAndViewImage(imageId) {
+            const element = document.getElementById('dicomImage');
+            const start = new Date().getTime();
+            cornerstone.loadImage(imageId).then(function (image) {
+                console.log(image);
+                const viewport = cornerstone.getDefaultViewportForImage(element, image);
+                // document.getElementById('toggleModalityLUT').checked = (viewport.modalityLUT !== undefined);
+                // document.getElementById('toggleVOILUT').checked = (viewport.voiLUT !== undefined);
+                cornerstone.displayImage(element, image, viewport);
+                if (loaded === false) {
+                    cornerstoneTools.mouseInput.enable(element);
+                    cornerstoneTools.mouseWheelInput.enable(element);
+                    cornerstoneTools.wwwc.activate(element, 1); // ww/wc is the default tool for left mouse button
+                    cornerstoneTools.pan.activate(element, 2); // pan is the default tool for middle mouse button
+                    cornerstoneTools.zoom.activate(element, 4); // zoom is the default tool for right mouse button
+                    cornerstoneTools.zoomWheel.activate(element); // zoom is the default tool for middle mouse wheel
+
+                    cornerstoneTools.imageStats.enable(element);
+                    loaded = true;
+                }
+
+
+            }, function (err) {
+                alert(err);
+            });
+        }
+
+        cornerstone.events.addEventListener('cornerstoneimageloadprogress', function (event) {
+            const eventData = event.detail;
+            const loadProgress = document.getElementById('loadProgress');
+            loadProgress.textContent = `Image Load Progress: ${eventData.percentComplete}%`;
+        });
+
+        const element = document.getElementById('dicomImage');
+        cornerstone.enable(element);
+
+        document.getElementById('selectFile').addEventListener('change', function (e) {
+            // Add the file to the cornerstoneFileImageLoader and get unique
+            // number for that file
+            const file = e.target.files[0];
+            const imageId = cornerstoneWADOImageLoader.wadouri.fileManager.add(file);
+            loadAndViewImage(imageId);
+        });
+    </script>
+
+
+    <script>
+        document.getElementById('zoomIn').addEventListener('click', function (e) {
+            const viewport = cornerstone.getViewport(element);
+            viewport.scale += 0.25;
+            cornerstone.setViewport(element, viewport);
+        });
+        document.getElementById('zoomOut').addEventListener('click', function (e) {
+            const viewport = cornerstone.getViewport(element);
+            viewport.scale -= 0.25;
+            cornerstone.setViewport(element, viewport);
+        });
+        document.getElementById('reset').addEventListener('click', function (e) {
+            cornerstone.reset(element);
+        });
+
+        // add event handlers to pan image on mouse move
+        element.addEventListener('mousedown', function (e) {
+            let lastX = e.pageX;
+            let lastY = e.pageY;
+
+            function mouseMoveHandler(e) {
+                const deltaX = e.pageX - lastX;
+                const deltaY = e.pageY - lastY;
+                lastX = e.pageX;
+                lastY = e.pageY;
+
+                const viewport = cornerstone.getViewport(element);
+                viewport.translation.x += (deltaX / viewport.scale);
+                viewport.translation.y += (deltaY / viewport.scale);
+                cornerstone.setViewport(element, viewport);
+            }
+
+            function mouseUpHandler() {
+                document.removeEventListener('mousemove', mouseMoveHandler);
+                document.removeEventListener('mouseup', mouseUpHandler);
+            }
+
+            document.addEventListener('mousemove', mouseMoveHandler);
+            document.addEventListener('mouseup', mouseUpHandler);
+        });
+
+        const mouseWheelEvents = ['mousewheel', 'DOMMouseScroll'];
+        mouseWheelEvents.forEach(function (eventType) {
+            element.addEventListener(eventType, function (e) {
+                // Firefox e.detail > 0 scroll back, < 0 scroll forward
+                // chrome/safari e.wheelDelta < 0 scroll back, > 0 scroll forward
+                let viewport = cornerstone.getViewport(element);
+                if (e.wheelDelta < 0 || e.detail > 0) {
+                    viewport.scale -= 0.25;
+                } else {
+                    viewport.scale += 0.25;
+                }
+
+                cornerstone.setViewport(element, viewport);
+
+                // Prevent page from scrolling
+                return false;
+            });
+        });
+    </script>
+
+    <script>
+        let ans_type = null;
+        $("#res_abnormal_btn").on('click', function () {
+            $(this).addClass('active');
+            $("#res_normal_btn").removeClass('active');
+            $("#res_ans_box").show();
+            ans_type = "abnormal";
+            console.log('ans type: ' + ans_type)
+
+        });
+        $("#res_normal_btn").on('click', function () {
+            $(this).addClass('active');
+            $("#res_abnormal_btn").removeClass('active');
+            $("#res_ans_box").hide();
+            ans_type = "normal";
+            console.log('ans type: ' + ans_type)
+        });
+
+        $("#add_question_btn").on('click', function () {
+            let file = $("#selectFile")[0].files[0];
+            console.log(file);
+            if (ans_type && file) {
+                if (ans_type === "normal") {
+                    let formdata = new FormData();
+                    formdata.append('dicom', file);
+                    {#console.log(formdata);#}
+                    {#formdata.append("file", file);#}
+                    formdata.append('csrfmiddlewaretoken', '{{ csrf_token }}');
+                    formdata.append('ans_type', '1');
+                    formdata.append('ans_text', '');
+                    $.ajax({
+                        url: "{% url 'add-question' set.pk %}",
+                        type: 'POST',
+                        data: formdata,
+                        processData: false,
+                        contentType: false,
+                        dataType: 'json',
+                        success: function (data) {
+                            if(data['msg']==="success"){
+                                $("#status").html("Question Uploaded!")
+                            } else {
+                                $("#status").html("Upload Failed!")
+                            }
+                        }
+
+                    });
+                    // lets upload the image
+                } else {
+                    let ans_text = $("#res_ans_box").val();
+                    console.log(ans_text);
+                    let formdata = new FormData();
+                    formdata.append('dicom', file);
+                    {#console.log(formdata);#}
+                    {#formdata.append("file", file);#}
+                    formdata.append('csrfmiddlewaretoken', '{{ csrf_token }}');
+                    formdata.append('ans_type', '2');
+                    formdata.append('ans_text', ans_text);
+                    $.ajax({
+                        url: "{% url 'add-question' set.pk %}",
+                        type: 'POST',
+                        data: formdata,
+                        processData: false,
+                        contentType: false,
+                        dataType: 'json',
+                        success: function (data) {
+                            if(data['msg']==="success"){
+                                $("#status").html("Question Uploaded!")
+                            } else {
+                                $("#status").html("Upload Failed!")
+                            }
+
+                        }
+
+                    });
+                }
+            } else {
+                console.log("please choose the ans type");
+            }
+        });
+
+
+    </script>
+
+
+{% endblock content %}

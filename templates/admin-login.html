@@ -1,0 +1,14 @@
+{% extends 'admin_base.html' %}
+{% block content %}
+    <div class="row justify-content-center p-1 m-1">
+    <form action="{% url 'admin-login' %}" method="post" class="bg-dark shadow-lg rounded p-4">
+
+    <h1 class="pb-4">Login As Admin</h1>
+    {% csrf_token %}
+    <input class="form-control my-2" type="text" placeholder="username" name="username">
+    <input class="form-control my-2" type="password" placeholder="password" name="password">
+    <button type="submit" class="btn btn-primary ml-auto">Login as admin</button>
+    </form>
+
+    </div>
+{% endblock content %}

@@ -1,0 +1,51 @@
+{% extends 'admin_base.html' %}
+
+{% block content %}
+<h4>We are viewing the set <span class="text-success">{{ set.name }}</span><span id="delete_set_btn" class="btn btn-sm btn-danger m-2 float-right">Delete Set</span></h4>
+    <div class="list-group text-dark">
+    {% for q in questions %}
+        <div class="list-group-item">
+        Question<button value="{{ q.pk }}" class="btn btn-sm btn-danger float-right delete_q_btn"> Delete</button>
+        </div>
+    {% endfor %}
+        <div class="list-group-item justify-content-center">
+        <a href="{% url 'add-question' set.pk %}" class="btn btn-sm btn-primary badge-pill"> Add Question</a>
+        </div>
+    </div>
+
+
+    <script>
+    $("#delete_set_btn").on('click', function () {
+       let set_pk = "{{ set.pk }}";
+       $.ajax({
+           'url':"{% url 'admin_delete_set' %}",
+           'type':'post',
+           data:{
+               'set_pk':set_pk,
+               'csrfmiddlewaretoken':"{{ csrf_token }}"
+           },
+           success:function (data) {
+               if(data['msg']==="success"){
+                   location.href = "/modules/admin-panel/modules/" + "{{ module.pk }}" + "/sets/";
+               }
+           }
+       })
+    });
+    $(".delete_q_btn").on('click', function () {
+       let q_pk = $(this).val();
+       $.ajax({
+           'url':"{% url 'admin_delete_question' %}",
+           'type':'post',
+           data:{
+               'question_pk':q_pk,
+               'csrfmiddlewaretoken':"{{ csrf_token }}"
+           },
+           success:function (data) {
+               if(data['msg']==="success"){
+                   location.reload();
+               }
+           }
+       })
+    });
+    </script>
+{% endblock content %}

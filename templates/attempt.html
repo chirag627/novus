@@ -1,0 +1,338 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <div class="row p-1 m-auto bg-transparent" style="width: 1400px">
+        <h4 class="px-2 m-1 pb-1 badge-pill bg-info text-white">{{ set.name }}</h4>
+    </div>
+    <div class="row border px-2 m-auto bg-transparent" id="test-box" style="width: 1400px">
+        <div class="col-5 p-0 m-0">
+            <div style="width:512px;height:512px;position:relative;color: white;display:inline-block;"
+                 oncontextmenu="return false"
+                 class='disable-selection noIbar shadow'
+                 unselectable='on'
+                 onselectstart='return false;'
+                 onmousedown='return false;'>
+                <div id="dicomImage"
+                     style="width:512px;height:512px;top:0px;left:0px; position:absolute">
+                </div>
+            </div>
+            <div class="row justify-content-start p-0 py-1 m-0 inline-flex">
+                <div class="">
+                    <button id="zoomIn" type="button" class="btn btn-light border shadow rounded-0 btn-sm">+</button>
+                    <button id="zoomOut" type="button" class="btn btn-light border shadow rounded-0 btn-sm">-</button>
+                    <button id="reset" type="button" class="btn btn-light border shadow rounded-0 btn-sm">X</button>
+                    <button id="rotate_l" type="button" class="btn btn-light border shadow rounded-0 btn-sm">
+                        &circlearrowleft;
+                    </button>
+                    <button id="rotate_r" type="button" class="btn btn-light border shadow rounded-0 btn-sm">
+                        &circlearrowright;
+                    </button>
+                    <button id="brightness_i" type="button" class="btn btn-light border shadow rounded-0 btn-sm">B+
+                    </button>
+                    <button id="brightness_d" type="button" class="btn btn-light border shadow rounded-0 btn-sm">B-
+                    </button>
+                    <button id="contrast_i" type="button" class="btn btn-light border shadow rounded-0 btn-sm">C+
+                    </button>
+                    <button id="contrast_d" type="button" class="btn btn-light border shadow rounded-0 btn-sm">C-
+                    </button>
+                </div>
+            </div>
+
+        </div>
+        <div class="border-left col-4 p-0 m-0">
+            <div class="row justify-content-center p-2 m-0">
+                <p>Question no: <span id="ques_number"></span></p>
+            </div>
+            <div class="row justify-content-center p-0 m-0 py-5">
+                <div class="btn-group w-75" id="res_box">
+                    <button id="res_normal_btn" class="btn btn-outline-info badge-pill">Normal</button>
+                    <button id="res_abnormal_btn" class="btn btn-outline-info badge-pill">Abnormal</button>
+                </div>
+                <div class="w-75 my-4">
+                    <textarea id="res_ans_box" class="form-control rounded-0 shadow"
+                              placeholder="Why It is abnormal?"></textarea>
+                </div>
+                <div class="position-absolute fixed-bottom py-2 px-5">
+                    <div class="btn-group w-100 pb-3" id="control-box">
+                        <button id="ctrl_prev" class="btn btn-sm  btn-primary badge-pill">Previous</button>
+                        <button id="ctrl_next" class="btn btn-sm  btn-primary ml-3 badge-pill">Next</button>
+                        <button id="ctrl_end" class="btn btn-sm btn-danger ml-3 badge-pill">End</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class=" border-left col-3 p-2 m-0">
+
+            {#        <div class="row justify-content-end p-2 pb-4 m-0">#}
+            {#            <div class="text-danger" id="timer">#}
+            {#                12:32 Min Left#}
+            {#            </div>#}
+            {#        </div>#}
+            <div class="row justify-content-start p-0 m-0" id="navigation-box">
+            </div>
+            <div class="row justify-content-center p-1 m-0">
+                <div class="list-group bg-transparent w-100">
+                    <div class="bg-transparent shadow my-2 list-group-item text-success rounded-0">
+                        Answered questions <span class="float-right" id="num_answered">0</span>
+                    </div>
+                    <div class="bg-transparent shadow my-2 list-group-item text-danger rounded-0">
+                        UnAnswered questions <span class="float-right" id="num_unanswered">0</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+{% endblock content %}
+
+{% block custom_script %}
+    <script>
+        cornerstoneWADOImageLoader.external.cornerstone = cornerstone;
+        cornerstoneWADOImageLoader.configure({
+            beforeSend: function (xhr) {
+                // Add custom headers here (e.g. auth tokens)
+                //xhr.setRequestHeader('x-auth-token', 'my auth token');
+            },
+            useWebWorkers: true,
+        });
+
+        let loaded = false;
+
+        function loadAndViewImage(imageId) {
+            const element = document.getElementById('dicomImage');
+            const start = new Date().getTime();
+            cornerstone.loadImage(imageId).then(function (image) {
+                console.log(image);
+                const viewport = cornerstone.getDefaultViewportForImage(element, image);
+                cornerstone.displayImage(element, image, viewport);
+                if (loaded === false) {
+                    cornerstoneTools.mouseInput.enable(element);
+                    cornerstoneTools.mouseWheelInput.enable(element);
+                    cornerstoneTools.wwwc.activate(element, 1); // ww/wc is the default tool for left mouse button
+                    cornerstoneTools.pan.activate(element, 2); // pan is the default tool for middle mouse button
+                    cornerstoneTools.zoom.activate(element, 4); // zoom is the default tool for right mouse button
+                    cornerstoneTools.zoomWheel.activate(element); // zoom is the default tool for middle mouse wheel
+
+                    cornerstoneTools.imageStats.enable(element);
+                    loaded = true;
+                }
+
+
+            }, function (err) {
+                alert(err);
+            });
+        }
+
+        cornerstone.events.addEventListener('cornerstoneimageloadprogress', function (event) {
+            const eventData = event.detail;
+            const loadProgress = document.getElementById('loadProgress');
+            loadProgress.textContent = `Image Load Progress: ${eventData.percentComplete}%`;
+        });
+
+        const element = document.getElementById('dicomImage');
+        cornerstone.enable(element);
+
+        let load_dicom = function downloadAndView(url) {
+            // let url = "https://raw.githubusercontent.com/cornerstonejs/cornerstoneWADOImageLoader/master/testImages/CT2_J2KR";
+            // prefix the url with wadouri: so cornerstone can find the image loader
+            url = "wadouri:" + url;
+
+            // image enable the dicomImage element and activate a few tools
+            console.log(url);
+            loadAndViewImage(url);
+        };
+        // load_dicom("images/0002.DCM");
+
+        cornerstone.events.addEventListener('cornerstoneimageloadprogress', function (event) {
+            const eventData = event.detail;
+            const loadProgress = document.getElementById('loadProgress');
+            loadProgress.textContent = `Image Load Progress: ${eventData.percentComplete}%`;
+        });
+
+        function getUrlWithoutFrame() {
+            var url = document.getElementById('wadoURL').value;
+            var frameIndex = url.indexOf('frame=');
+            if (frameIndex !== -1) {
+                url = url.substr(0, frameIndex - 1);
+            }
+            return url;
+        }
+
+
+    </script>
+
+
+    <script>
+        // Add event handlers to zoom the image in and out
+        document.getElementById('zoomIn').addEventListener('click', function (e) {
+            const viewport = cornerstone.getViewport(element);
+            viewport.scale += 0.25;
+            cornerstone.setViewport(element, viewport);
+        });
+        // Assigning keyboard
+        document.onkeyup = function (e) {
+            if (e.which == 90) {
+                // zoom in(z)
+                const viewport = cornerstone.getViewport(element);
+                viewport.scale += 0.25;
+                cornerstone.setViewport(element, viewport);
+            } else if (e.which == 88) {
+                // zoom out (x)
+                const viewport = cornerstone.getViewport(element);
+                viewport.scale -= 0.25;
+                cornerstone.setViewport(element, viewport);
+
+            } else if (e.which == 84) {
+                // clockwise rotation (t)
+                const viewport = cornerstone.getViewport(element);
+                viewport.rotation += 20;
+                cornerstone.setViewport(element, viewport);
+
+            } else if (e.which == 82) {
+                // anticlockwise rotation (r)
+                const viewport = cornerstone.getViewport(element);
+                viewport.rotation -= 20;
+                cornerstone.setViewport(element, viewport);
+            }
+            console.log(e.which);
+
+        };
+
+        document.getElementById('zoomOut').addEventListener('click', function (e) {
+            const viewport = cornerstone.getViewport(element);
+            viewport.scale -= 0.25;
+            cornerstone.setViewport(element, viewport);
+        });
+
+        document.getElementById('reset').addEventListener('click', function (e) {
+            cornerstone.reset(element);
+            element.style.filter = "brightness(100%)";
+            element.style.filter = "contrast(100%)";
+        });
+
+
+        document.getElementById('rotate_r').addEventListener('click', function (e) {
+            const viewport = cornerstone.getViewport(element);
+            viewport.rotation += 20;
+            cornerstone.setViewport(element, viewport);
+        });
+        document.getElementById('rotate_l').addEventListener('click', function (e) {
+            const viewport = cornerstone.getViewport(element);
+            viewport.rotation -= 20;
+            cornerstone.setViewport(element, viewport);
+        });
+        document.getElementById('brightness_i').addEventListener('click', function (e) {
+            element.style.filter = "brightness(200%)";
+        });
+        document.getElementById('brightness_d').addEventListener('click', function (e) {
+            element.style.filter = "brightness(50%)";
+        });
+        document.getElementById('contrast_i').addEventListener('click', function (e) {
+            element.style.filter = "contrast(200%)";
+        });
+        document.getElementById('contrast_d').addEventListener('click', function (e) {
+            element.style.filter = "contrast(50%)";
+        });
+
+        // add event handlers to pan image on mouse move
+        element.addEventListener('mousedown', function (e) {
+            let lastX = e.pageX;
+            let lastY = e.pageY;
+
+            function mouseMoveHandler(e) {
+                const deltaX = e.pageX - lastX;
+                const deltaY = e.pageY - lastY;
+                lastX = e.pageX;
+                lastY = e.pageY;
+
+                const viewport = cornerstone.getViewport(element);
+                viewport.translation.x += (deltaX / viewport.scale);
+                viewport.translation.y += (deltaY / viewport.scale);
+                cornerstone.setViewport(element, viewport);
+            }
+
+            function mouseUpHandler() {
+                document.removeEventListener('mousemove', mouseMoveHandler);
+                document.removeEventListener('mouseup', mouseUpHandler);
+            }
+
+            document.addEventListener('mousemove', mouseMoveHandler);
+            document.addEventListener('mouseup', mouseUpHandler);
+        });
+
+        const mouseWheelEvents = ['mousewheel', 'DOMMouseScroll'];
+        mouseWheelEvents.forEach(function (eventType) {
+            element.addEventListener(eventType, function (e) {
+                // Firefox e.detail > 0 scroll back, < 0 scroll forward
+                // chrome/safari e.wheelDelta < 0 scroll back, > 0 scroll forward
+                let viewport = cornerstone.getViewport(element);
+                if (e.wheelDelta < 0 || e.detail > 0) {
+                    viewport.scale -= 0.25;
+                } else {
+                    viewport.scale += 0.25;
+                }
+
+                cornerstone.setViewport(element, viewport);
+
+                // Prevent page from scrolling
+                return false;
+            });
+        });
+    </script>
+    <script>
+        const set_pk = "{{ set.pk }}";
+        const user_pk = "{{ user.pk }}";
+        const csrf_token = "{{ csrf_token }}";
+        const submit_response_url = "{% url 'submit_response' %}";
+        const get_question_url = "{% url 'get_questions' %}";
+        let as = new AttemptSet(set_pk, user_pk, get_question_url, csrf_token, submit_response_url);
+        $(document).ready(function () {
+
+
+            as.start(load_dicom);
+            $("#ctrl_prev").on('click', function () {
+                as.previous_question();
+            });
+
+            {#setInterval(as.set_timer, 1000);#}
+            $("#ctrl_next").on('click', function () {
+                as.next_question();
+            });
+            $("#ctrl_end").on('click', function () {
+                let res = confirm("Do you really want to finish the test?");
+                if (res) {
+                    as.set_finish();
+                }
+            });
+
+            $("#res_abnormal_btn").on('click', function () {
+                $(this).addClass('active');
+                $("#res_normal_btn").removeClass('active');
+                $("#res_ans_box").on("keyup", function () {
+                    as.set_response_for_ques(false, true, $("#res_ans_box").val());
+                });
+                $("#res_ans_box").show();
+
+            });
+            $("#res_normal_btn").on('click', function () {
+                $(this).addClass('active');
+                $("#res_abnormal_btn").removeClass('active');
+                as.set_response_for_ques(true, false, "None");
+                $("#res_ans_box").hide();
+            });
+
+
+            $("#navigation-box").on('click', "button", function () {
+                let counter = $(this).val();
+                let qc = as.current_question_counter;
+                as.submit_response_for(parseInt(qc));
+                as.display_question(counter);
+            });
+        });
+
+
+    </script>
+
+
+{% endblock custom_script %}

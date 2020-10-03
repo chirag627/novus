@@ -1,0 +1,36 @@
+{% extends 'admin_base.html' %}
+{% block content %}
+    <h2>list of all Sets in Module <span class="text-danger">{{ module.name }}</span> <button class="btn btn-sm btn-danger m-1 float-right" id="delete_m_btn">delete this module</button></h2>
+    <div class="list-group">
+    {% for s in sets %}
+        <div class="list-group-item rounded-0 list-group-item-success">
+        <button class="btn btn-sm btn-success badge-pill float-right">{{ s.question_set.count }} questions</button>
+            <a class="my-1 rounded-0" href="{% url 'view-set' s.pk %}">{{ s.name }}</a>
+
+        </div>
+    {% endfor %}
+
+    </div>
+    <a class="btn btn-sm btn-success badge-pill my-2" href="{% url 'add-set' %}">Add Set</a>
+
+
+    <script>
+        $("#delete_m_btn").on('click', function () {
+            let module_pk = "{{ module.pk }}";
+       $.ajax({
+           'url':"{% url 'delete-module' %}",
+           'type':'post',
+           data:{
+               'module_pk':module_pk,
+               'csrfmiddlewaretoken':"{{ csrf_token }}"
+           },
+           success:function (data) {
+               if(data['msg']==="success"){
+                   location.href = "/modules/admin-panel/modules";
+               }
+           }
+       })
+    });
+
+    </script>
+{% endblock content %}

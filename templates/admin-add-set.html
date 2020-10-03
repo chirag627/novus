@@ -1,0 +1,17 @@
+{% extends 'admin_base.html' %}
+{% block content %}
+    <div class="row justify-content-center p-4 m-1">
+        <form action="{% url 'add-set' %}" method="post" class="p-2 text-dark bg-light rounded border" style="min-width: 300px">
+    <h4>Add sets</h4>
+    {% csrf_token %}
+    <input class="form-control my-2 rounded-0" type="text" placeholder="set name" name="name">
+    <select class="form-control custom-select" name="module_pk">
+        {% for m in modules %}
+            <option value="{{ m.pk }}">{{ m.name }}</option>
+        {% endfor %}
+    </select>
+    <button class="btn mt-2 btn-primary d-block ml-auto" type="submit">Create Set</button>
+    </form>
+
+    </div>
+{% endblock content %}

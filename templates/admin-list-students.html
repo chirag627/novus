@@ -1,0 +1,11 @@
+{% extends 'admin_base.html' %}
+{% block content %}
+    <h4>list of all students</h4>
+    <div class="list-group">
+    {% for s in students %}
+        <div class="list-group-item">
+        <a href="{% url 'detail-student' s.pk %}">{{ s.username }}</a>
+        </div>
+    {% endfor %}
+    </div>
+{% endblock content %}

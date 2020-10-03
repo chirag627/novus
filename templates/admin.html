@@ -1,0 +1,23 @@
+{% extends 'admin_base.html' %}
+
+{% block content %}
+
+    <div class="row justify-content-center py-4 text-dark">
+        <div class="col col-sm-6 col-md-4 col-lg-3">
+            <div class="card bg-white text-center py-3" style="min-height: 120px">
+                <a class="lead text-primary" href="{% url 'list-students' %}">{{ students.count }} Students</a>
+            </div>
+        </div>
+        <div class="col col-sm-6 col-md-4 col-lg-3">
+            <div class="card bg-white text-center py-3" style="min-height: 120px">
+                <a href="{% url 'admin-modules' %}" class="lead text-success">{{ modules.count }} modules</a>
+            </div>
+        </div>
+        <div class="col col-sm-6 col-md-4 col-lg-3">
+            <div class="card bg-white text-center py-3" style="min-height: 120px">
+                <a class="lead text-dark" href="{% url 'attempted-sets-admin' %}">{{ attempted_sets.count }} Attempted sets</a>
+            </div>
+        </div>
+    </div>
+
+{% endblock content %}

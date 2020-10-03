@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <h1>Attempted Sets</h1>
+<div class="row justify-content-center m-2 p-2">
+    <div class="list-group w-75 shadow">
+        {% for a in attempted %}
+    <div class="shadow my-1 list-group-item w-100 rounded-0">
+        <a href="{% url 'result' a.set.pk %}" class=" {% if not a.is_evaluated %}disabled{% endif %} btn btn-sm btn-success float-right ml-2">View Result</a>
+        <a href="{% url 'evaluate' a.set.pk %}" class="btn btn-sm btn-info float-right ml-2">{% if a.is_evaluated %}Re - {% endif %}Evaluate</a>
+        <a>{{ a.set.name }}</a>
+    </div>
+        {% endfor %}
+    </div>
+
+</div>
+
+{% endblock content %}

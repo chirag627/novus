@@ -1,0 +1,13 @@
+{% extends 'admin_base.html' %}
+{% block content %}
+    <div class="row justify-content-center m-0 p-0 py-4">
+        <form action="{% url 'add-module' %}" method="post" class="p-4 border rounded bg-light text-dark">
+    <h1>Lets add the module</h1>
+    {% csrf_token %}
+    <input type="text" placeholder="name" name="name" class="form-control my-2">
+    <textarea name="description" placeholder="description" class="form-control my-2"></textarea>
+    <button type="submit" class="btn btn-sm btn-primary d-block ml-auto">Add module</button>
+    </form>
+
+    </div>
+{% endblock content %}

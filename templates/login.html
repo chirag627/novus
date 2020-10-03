@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <br/>
+    <div class="row justify-content-center m-2 p-0">
+        <div class="col-12 col-md-8 col-lg-6 border p-2 bg-white">
+            this is the login form<a href="{% url 'signup' %}" class="ml-3 btn btn-sm badge-pill btn-light border text-primary shadow">Register</a>
+            <form class="w-100 py-2" action="{% url 'login' %}" method="post">
+                {% csrf_token %}
+                <input type="text" name="username" class="form-control border rounded-0 my-2" placeholder="Username">
+                <input type="password" name="password" class="form-control border rounded-0 my-2" placeholder="Password">
+                <button type="submit" class="btn btn-light border rounded-0">Login</button>
+            </form>
+        </div>
+    </div>
+
+{% endblock content %}

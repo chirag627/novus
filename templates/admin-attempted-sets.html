@@ -1,0 +1,10 @@
+{% extends 'admin_base.html' %}
+{% block content %}
+    <div class="list-group text-dark">
+    {% for s in attempted_sets %}
+        <div class="list-group-item">
+            <a href="{% url 'admin-result' s.set.pk %}">{{ s }} <span class="text-danger">(view result)</span></a>
+        </div>
+    {% endfor %}
+    </div>
+{% endblock content %}

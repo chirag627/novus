@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <a href="{% url 'attempted_sets' %}" class="btn btn-success badge-pill float-right m-2">Attempted sets</a>
+    <h1>Modules</h1>
+<div class="row justify-content-center m-2 p-0">
+{% for m in modules %}
+    <div class="col-12 m-2 col-sm-6 col-md-4 col-lg-3 card p-0 shadow bg-white rounded-0">
+        <div class="card-body">
+            {{ m.description }}
+        </div>
+        <div class="card-footer bg-white">
+            <a href="{% url 'mudule_sets_list' m.pk %}" class="float-right btn btn-primary btn-sm text-white">View Sets</a>
+            <h4>{{ m.name }}</h4>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endblock content %}

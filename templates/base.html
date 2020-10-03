@@ -1,0 +1,58 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Medical Project</title>
+
+    {% block stylesheet %}
+        <style>
+        *{
+            font-family: "Lexend Deca", sans-serif;
+        }
+        </style>
+    <link rel="stylesheet" href="{% static 'css/bootstrap.css' %}">
+    <link rel="stylesheet" href="{% static 'css/bootstrap-grid.css' %}">
+    <link rel="stylesheet" href="{% static 'css/bootstrap-reboot.css' %}">
+    <link href="https://fonts.googleapis.com/css?family=Lexend+Deca&display=swap" rel="stylesheet">
+
+    {% endblock stylesheet %}
+{% block script %}
+    <script src="{% static 'js/jquery.min.js' %}" type="text/javascript"></script>
+    <script src="{% static 'js/cornerstone.js' %}" type="text/javascript"></script>
+    <script src="{% static 'js/cornerstone_wado_image_loader.js' %}" type="text/javascript"></script>
+    <script src="{% static 'js/bootstrap.bundle.js' %}" type="text/javascript"></script>
+    <script src="{% static 'js/bootstrap.js' %}" type="text/javascript"></script>
+    <script src="{% static 'js/dcom_parser.js' %}" type="text/javascript"></script>
+    <script src="{% static 'js/core/AttemptSet.js' %}" type="text/javascript"></script>
+    <script src="{% static 'js/core/EvaluateSet.js' %}" type="text/javascript"></script>
+{% endblock script %}
+</head>
+<body class="text-dark" style="background-color: #f6f6f6">
+
+{% block header %}
+    <div class="header shadow mb-3 p-2">
+    <div class="float-right text-light m-2">
+
+        {% if user.is_authenticated %}
+            <p class="font-weight-lighter p-1">{{ user.username }}<a class="p-1 ml-2 p-1 rounded text-primary border-primary border" href="{% url 'list_modules' %}">Home</a><a href="{% url 'logout' %}" class="p-1 ml-2 p-1 rounded border-danger border text-danger">logout</a></p>
+        {% else %}
+
+        {% endif %}
+    </div>
+    <h2 class="font-weight-bold">Capstone Project</h2>
+    </div>
+{% endblock header %}
+
+{% block content %}
+{% endblock content %}
+
+{% block footer %}
+{% endblock footer %}
+
+</body>
+{% block custom_script %}
+
+{% endblock custom_script %}
+
+</html>

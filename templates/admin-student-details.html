@@ -1,0 +1,8 @@
+{% extends 'admin_base.html' %}
+{% block content %}
+    {% if student %}
+        <p>First name: {{ student.first_name }}</p>
+        <p>Last name: {{ student.last_name }}</p>
+        <p>username: {{ student.username }}</p>
+    {% endif %}
+{% endblock content %}

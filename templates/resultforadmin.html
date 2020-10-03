@@ -1,0 +1,26 @@
+{% extends 'admin_base.html' %}
+
+{% block content %}
+
+    <div class="container">
+        <a href="{% url 'attempted-sets-admin' %}" class="btn btn-info btn-sm float-right m-2">Go Back</a>
+    <h1>Result Page</h1>
+    </div>
+    <div class="row justify-content-center m-2 p-0">
+    <div class="w-75 shadow bg-dark card rounded">
+        <div class="card-header bg-success">
+{#            <a href="{% url 'evaluate' attempt.set.pk %}" class="float-right btn text-info btn-sm btn-light">Re-Evaluate</a>#}
+            {{ attempt }}</div>
+        <div class="card-body">
+            <a class="display-4 p-2 border-success text-success float-right font-weight-bold border">{{ num_correct }}/{{ num_questions }}</a>
+            <p>Total Questions : <span class="font-weight-bold text-primary">{{ num_questions }}</span></p>
+            <p>Attempted Questions : <span class="font-weight-bold text-primary">{{ num_answered }}</span></p>
+            <p>Right Answers : <span class="font-weight-bold text-primary">{{ num_correct }}</span></p>
+        </div>
+        <div class="card-footer">
+            Overall Score : <span class="font-weight-bold text-success">{{ percentage }}%</span>
+        </div>
+    </div>
+</div>
+
+{% endblock content %}

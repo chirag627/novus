@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h1>Sets in <span class="text-info font-weight-bold">{{ module.name }}</span></h1>
+    <div class="row justify-content-center m-2 p-2">
+
+    {% for s in sets %}
+        <div class="list-group w-75 bg-light">
+            <div class="my-1 bg-white list-group-item w-100 rounded-0">
+                <a href="{% url 'attempt_set' s.pk %}" class="btn btn-sm btn-primary float-right ml-2">Attempt</a>
+                <a>{{ s.name }}</a>
+            </div>
+        </div>
+    {% endfor %}
+    </div>
+{% endblock content %}
